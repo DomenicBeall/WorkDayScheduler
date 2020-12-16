@@ -17,20 +17,31 @@ var timeBlocks = [{Time: "9", Activities: ""},
 init();
 
 function init() {
-    // Loads any time blocks stored in local storage
-    
+    // Check if there is any saved timeblocks
+    var savedBlocks = JSON.parse(localStorage.getItem("timeBlocks"));
 
+    if (savedBlocks !== null)
+        timeBlocks = savedBlocks;
+
+    // Render the time blocks
     renderTimeBlocks();
 }
 
+// Draws the timeblock elements to the window
 function renderTimeBlocks() {
+
+    // For each time block
     timeBlocks.forEach(block => {
+
+        // Create a containing div
         var blockDiv = $("<div></div>");
         blockDiv.attr("class", "row");
 
+        // Create divs to hold the hour on the left of the time block
         var hourDiv = $("<div></div>");
         var hourText = $("<p></p>");
 
+        // Convert from 24 hour to 12 hour AM PM time
         var AMorPM = (block.Time <= 12) ? "AM" : "PM";
         var time = (block.Time <= 12) ? block.Time : block.Time - 12;
 
@@ -40,9 +51,12 @@ function renderTimeBlocks() {
         hourDiv.attr("class", "hour");
         blockDiv.append(hourDiv);
 
+        // Create an input field for the activities
         var activityInput = $("<input type=\"text\"></input>");
         activityInput.val(block.Activities);
+        activityInput.attr("id", block.Time);
 
+        // Get the current hour then set the colour of the time block based on whether or not it's in the future, present or past
         var currentHour = moment().format("H");
 
         if (currentHour > Number(block.Time))
@@ -54,7 +68,7 @@ function renderTimeBlocks() {
         
         blockDiv.append(activityInput);
 
-        
+        // Create a button to save the timeblock and give it an icon
         var activitySaveButton = $("<button></button>");
         activitySaveButton.attr("class", "saveBtn");
         activitySaveButton.attr("data-time", block.Time);
@@ -67,21 +81,22 @@ function renderTimeBlocks() {
 
         timeblockContainer.append(blockDiv);
     });
+    
 }
 
+// Saves the modified timeblocks
 function saveTimeBlocks(event) {
-    var savedBlocks = localStorage.getItem("timeBlocks");
+    // Get
+    var savedBlocks = JSON.parse(localStorage.getItem("timeBlocks"));
 
     if (savedBlocks === null)
         savedBlocks = timeBlocks;
-    else
-        savedBlocks = JSON.parse(savedBlocks);
 
-    savedBlocks.forEach(block => {
-        if (block.time === event.currentTarget.dataset.time) {
-            block.Activities = "";
+    timeBlocks.forEach(block => {
+        if (block.Time === event.currentTarget.dataset.time) {
+            block.Activities = $("#" + block.Time)[0].value;
         }
     });
 
-    localStorage.setItem("timeBlocks", savedBlocks);
+    localStorage.setItem("timeBlocks", JSON.stringify(savedBlocks));
 }
